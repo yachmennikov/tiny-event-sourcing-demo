@@ -16,13 +16,13 @@ data class AccountCreatedEvent(
     name = ACCOUNT_CREATED_EVENT,
 )
 
-//@DomainEvent(name = BANK_ACCOUNT_CREATED_EVENT)
-//data class BankAccountCreatedEvent(
-//    val accountId: UUID,
-//    val bankAccountId: UUID,
-//) : Event<AccountAggregate>(
-//    name = BANK_ACCOUNT_CREATED_EVENT,
-//)
+@DomainEvent(name = BANK_ACCOUNT_CREATED_EVENT)
+data class BankAccountCreatedEvent(
+    val accountId: UUID,
+    val bankAccountId: UUID,
+) : Event<AccountAggregate>(
+    name = BANK_ACCOUNT_CREATED_EVENT,
+)
 //@DomainEvent(name = BANK_ACCOUNT_REMOVED_EVENT)
 //data class BankAccountRemovedEvent(
 //    val accountId: UUID,
