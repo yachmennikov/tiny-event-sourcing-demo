@@ -1,9 +1,6 @@
 package ru.quipy.logic
 
-import ru.quipy.api.AccountAggregate
-import ru.quipy.api.AccountCreatedEvent
-import ru.quipy.api.BankAccountCreatedEvent
-import ru.quipy.api.BankAccountDepositEvent
+import ru.quipy.api.*
 import ru.quipy.core.annotations.StateTransitionFunc
 import ru.quipy.domain.AggregateState
 import ru.quipy.utils.formatNumber
@@ -52,6 +49,21 @@ class AccountAggregateState : AggregateState<UUID, AccountAggregate> {
         )
     }
 
+    fun withdraw(fromBankAccountId: UUID, amount: BigDecimal): BankAccountWithdrawalEvent {
+        val fromBankAccount = bankAccounts[fromBankAccountId]
+            ?: throw IllegalArgumentException("No such account to withdraw from: $fromBankAccountId")
+
+        if (amount > fromBankAccount.balance) {
+            throw IllegalArgumentException("Cannot withdraw $amount. Not enough money: ${fromBankAccount.balance}")
+        }
+
+        return BankAccountWithdrawalEvent(
+            accountId = accountId,
+            bankAccountId = fromBankAccountId,
+            amount = amount
+        )
+    }
+
      // aggregate state functions
     @StateTransitionFunc
     fun newAccountCreatedApply(event: AccountCreatedEvent) {
@@ -65,7 +77,12 @@ class AccountAggregateState : AggregateState<UUID, AccountAggregate> {
     }
 
     @StateTransitionFunc
-    fun deposit(event: BankAccountDepositEvent) {
+    fun depositApply(event: BankAccountDepositEvent) {
         this.bankAccounts[event.bankAccountId]!!.deposit(event.amount)
+    }
+
+    @StateTransitionFunc
+    fun withdrawApply(event: BankAccountWithdrawalEvent) {
+        bankAccounts[event.bankAccountId]!!.withdraw(event.amount)
     }
 }

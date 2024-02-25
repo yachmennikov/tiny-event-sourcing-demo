@@ -1,10 +1,7 @@
 package ru.quipy.controller
 
 import org.springframework.web.bind.annotation.*
-import ru.quipy.api.AccountAggregate
-import ru.quipy.api.AccountCreatedEvent
-import ru.quipy.api.BankAccountCreatedEvent
-import ru.quipy.api.BankAccountDepositEvent
+import ru.quipy.api.*
 import ru.quipy.logic.AccountAggregateState
 import ru.quipy.core.EventSourcingService
 import ru.quipy.logic.BankAccount
@@ -38,12 +35,21 @@ class AccountController(
         return accountEsService.getState(accountId)?.bankAccounts?.get(bankAccountId)
     }
 
-    @PostMapping("/{accountId}/bankAccounts/{bankAccountId}/deposit/{amount}")
+    @PostMapping("/deposit")
     fun deposit(
-        @PathVariable accountId: UUID,
-        @PathVariable bankAccountId: String,
-        @PathVariable amount: BigDecimal
+        @RequestParam accountId: UUID,
+        @RequestParam bankAccountId: String,
+        @RequestParam amount: BigDecimal
     ) : BankAccountDepositEvent {
         return accountEsService.update(accountId) { it.deposit(accountId, amount) }
+    }
+
+    @PostMapping("/withdraw")
+    fun withdraw(
+        @RequestParam accountId: UUID,
+        @RequestParam bankAccountId: String,
+        @RequestParam amount: BigDecimal
+    ) : BankAccountWithdrawalEvent {
+        return accountEsService.update(accountId) { it.withdraw(accountId, amount) }
     }
 }

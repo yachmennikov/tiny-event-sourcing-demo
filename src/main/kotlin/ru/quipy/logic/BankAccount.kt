@@ -10,4 +10,8 @@ data class BankAccount(
     fun deposit(amount: BigDecimal) {
         this.balance = this.balance.add(amount)
     }
+
+    fun withdraw(amount: BigDecimal) {
+        this.balance = this.balance.subtract(amount)
+    }
 }

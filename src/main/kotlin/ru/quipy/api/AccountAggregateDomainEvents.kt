@@ -8,6 +8,7 @@ import java.util.UUID
 const val ACCOUNT_CREATED_EVENT = "PROJECT_CREATED_EVENT"
 const val BANK_ACCOUNT_CREATED_EVENT = "BANK_ACCOUNT_CREATED_EVENT"
 const val BANK_ACCOUNT_DEPOSIT_EVENT = "BANK_ACCOUNT_DEPOSIT_EVENT"
+const val BANK_ACCOUNT_WITHDRAWAL_EVENT = "BANK_ACCOUNT_WITHDRAWAL_EVENT"
 
 @DomainEvent(name = ACCOUNT_CREATED_EVENT)
 data class AccountCreatedEvent(
@@ -32,4 +33,13 @@ data class BankAccountDepositEvent(
     val amount: BigDecimal,
 ) : Event<AccountAggregate>(
     name = BANK_ACCOUNT_DEPOSIT_EVENT,
+)
+
+@DomainEvent(name = BANK_ACCOUNT_WITHDRAWAL_EVENT)
+data class BankAccountWithdrawalEvent(
+    val accountId: UUID,
+    val bankAccountId: UUID,
+    val amount: BigDecimal,
+) : Event<AccountAggregate>(
+    name = BANK_ACCOUNT_WITHDRAWAL_EVENT,
 )
