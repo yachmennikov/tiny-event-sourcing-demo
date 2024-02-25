@@ -4,9 +4,11 @@ import org.springframework.web.bind.annotation.*
 import ru.quipy.api.AccountAggregate
 import ru.quipy.api.AccountCreatedEvent
 import ru.quipy.api.BankAccountCreatedEvent
+import ru.quipy.api.BankAccountDepositEvent
 import ru.quipy.logic.AccountAggregateState
 import ru.quipy.core.EventSourcingService
 import ru.quipy.logic.BankAccount
+import java.math.BigDecimal
 
 import java.util.*
 
@@ -34,5 +36,14 @@ class AccountController(
     @GetMapping("/{accountId}/bankAccounts/{bankAccountId}")
     fun getBankAccount(@PathVariable accountId: UUID, @PathVariable bankAccountId: UUID) : BankAccount? {
         return accountEsService.getState(accountId)?.bankAccounts?.get(bankAccountId)
+    }
+
+    @PostMapping("/{accountId}/bankAccounts/{bankAccountId}/deposit/{amount}")
+    fun deposit(
+        @PathVariable accountId: UUID,
+        @PathVariable bankAccountId: String,
+        @PathVariable amount: BigDecimal
+    ) : BankAccountDepositEvent {
+        return accountEsService.update(accountId) { it.deposit(accountId, amount) }
     }
 }
