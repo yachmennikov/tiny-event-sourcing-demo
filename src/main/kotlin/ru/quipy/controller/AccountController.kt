@@ -1,12 +1,19 @@
 package ru.quipy.controller
 
-import org.springframework.web.bind.annotation.*
-import ru.quipy.api.*
-import ru.quipy.logic.AccountAggregateState
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
+import ru.quipy.api.AccountAggregate
+import ru.quipy.api.AccountCreatedEvent
+import ru.quipy.api.BankAccountCreatedEvent
 import ru.quipy.core.EventSourcingService
+import ru.quipy.domain.Event
+import ru.quipy.logic.AccountAggregateState
 import ru.quipy.logic.BankAccount
 import java.math.BigDecimal
-
 import java.util.*
 
 @RestController
@@ -15,41 +22,42 @@ class AccountController(
     val accountEsService: EventSourcingService<UUID, AccountAggregate, AccountAggregateState>
 ) {
 
-    @GetMapping("/{holderId}")
-    fun getAccount(@PathVariable holderId: UUID) : AccountAggregateState? {
-        return accountEsService.getState(holderId)
-    }
-
     @PostMapping("/{holderId}")
-    fun createAccount(@PathVariable holderId: UUID) : AccountCreatedEvent {
+    fun createAccount(@PathVariable holderId: UUID): AccountCreatedEvent {
         return accountEsService.create { it.createNewAccount(holderId = holderId) }
     }
 
-    @PostMapping("/{accountId}/bankAccounts")
-    fun createBankAccount(@PathVariable accountId: UUID) : BankAccountCreatedEvent {
-        return accountEsService.update(accountId) { it.createNewBankAccount(accountId) }
+    @GetMapping("/{accountId}")
+    fun getAccount(@PathVariable accountId: UUID): AccountAggregateState? {
+        return accountEsService.getState(accountId)
     }
 
-    @GetMapping("/{accountId}/bankAccounts/{bankAccountId}")
-    fun getBankAccount(@PathVariable accountId: UUID, @PathVariable bankAccountId: UUID) : BankAccount? {
+    @PostMapping("/{accountId}/bankAccount")
+    fun createBankAccount(@PathVariable accountId: UUID): BankAccountCreatedEvent {
+        return accountEsService.update(accountId) { it.createNewBankAccount() }
+    }
+
+    @GetMapping("/{accountId}/bankAccount/{bankAccountId}")
+    fun getBankAccount(@PathVariable accountId: UUID, @PathVariable bankAccountId: UUID): BankAccount? {
         return accountEsService.getState(accountId)?.bankAccounts?.get(bankAccountId)
     }
 
     @PostMapping("/deposit")
-    fun deposit(
+    fun makeDeposit(
         @RequestParam accountId: UUID,
-        @RequestParam bankAccountId: String,
-        @RequestParam amount: BigDecimal
-    ) : BankAccountDepositEvent {
-        return accountEsService.update(accountId) { it.deposit(accountId, amount) }
+        @RequestParam bankAccountId: UUID,
+        @RequestParam amount: BigDecimal,
+    ): Event<AccountAggregate> {
+        return accountEsService.update(accountId) { it.deposit(bankAccountId, amount) }
     }
 
     @PostMapping("/withdraw")
-    fun withdraw(
+    fun makeWithdraw(
         @RequestParam accountId: UUID,
-        @RequestParam bankAccountId: String,
-        @RequestParam amount: BigDecimal
-    ) : BankAccountWithdrawalEvent {
-        return accountEsService.update(accountId) { it.withdraw(accountId, amount) }
+        @RequestParam bankAccountId: UUID,
+        @RequestParam amount: BigDecimal,
+    ): Event<AccountAggregate> {
+        return accountEsService.update(accountId) { it.withdraw(bankAccountId, amount) }
     }
+
 }

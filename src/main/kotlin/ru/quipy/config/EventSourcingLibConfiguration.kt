@@ -6,9 +6,11 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import ru.quipy.api.AccountAggregate
 import ru.quipy.api.ProjectAggregate
+import ru.quipy.api.TransferAggregate
 import ru.quipy.core.EventSourcingServiceFactory
 import ru.quipy.logic.AccountAggregateState
 import ru.quipy.logic.ProjectAggregateState
+import ru.quipy.logic.TransferAggregateState
 import ru.quipy.projections.AnnotationBasedProjectEventsSubscriber
 import ru.quipy.streams.AggregateEventStreamManager
 import ru.quipy.streams.AggregateSubscriptionsManager
@@ -32,14 +34,14 @@ class EventSourcingLibConfiguration {
     @Autowired
     private lateinit var eventStreamManager: AggregateEventStreamManager
 
-    /**
-     * Use this object to create/update the aggregate
-     */
     @Bean
     fun projectEsService() = eventSourcingServiceFactory.create<UUID, ProjectAggregate, ProjectAggregateState>()
 
     @Bean
     fun accountEsService() = eventSourcingServiceFactory.create<UUID, AccountAggregate, AccountAggregateState>()
+
+    @Bean
+    fun transferEsService() = eventSourcingServiceFactory.create<UUID, TransferAggregate, TransferAggregateState>()
 
 
     @PostConstruct
